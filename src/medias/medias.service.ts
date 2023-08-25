@@ -1,7 +1,5 @@
 import {
   ConflictException,
-  HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -17,11 +15,13 @@ export class MediasService {
     const media =
       await this.mediaReposity.getMediaByTitleAndUser(createMediaDto);
     if (media) throw new ConflictException();
+
     return this.mediaReposity.addMedia(createMediaDto);
   }
 
   async findAll() {
     const media = await this.mediaReposity.getAllMedias();
+
     return media.map((m) => ({
       id: m.id,
       title: m.title,
@@ -32,11 +32,19 @@ export class MediasService {
   async findOne(id: number) {
     const media = await this.mediaReposity.getMediaById(id);
     if (!media) throw new NotFoundException();
+
     return media;
   }
 
-  update(id: number, updateMediaDto: UpdateMediaDto) {
-    return `This action updates a #${id} media`;
+  async update(id: number, updateMediaDto: UpdateMediaDto) {
+    const media = await this.mediaReposity.getMediaById(id);
+    if (!media) throw new NotFoundException();
+
+    const conflict =
+      await this.mediaReposity.getMediaByTitleAndUser(updateMediaDto);
+    if (conflict) throw new ConflictException();
+
+    return this.mediaReposity.updateMedia(id, updateMediaDto);
   }
 
   remove(id: number) {
