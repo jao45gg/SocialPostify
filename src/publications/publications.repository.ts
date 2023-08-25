@@ -44,4 +44,12 @@ export class PublicationsRepository {
       },
     });
   }
+
+  async deletePublication(id: number) {
+    return await this.prisma.publications.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }

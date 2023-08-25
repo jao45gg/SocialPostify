@@ -21,22 +21,22 @@ export class PostsController {
   }
 
   @Get()
-  findAll() {
-    return this.postsService.findAll();
+  async findAll() {
+    return await this.postsService.findAll();
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.postsService.findOne(+id);
+  async findOne(@Param("id") id: string) {
+    return await this.postsService.findOne(+id);
   }
 
   @Put(":id")
-  update(@Param("id") id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postsService.update(+id, updatePostDto);
+  async update(@Param("id") id: string, @Body() updatePostDto: UpdatePostDto) {
+    return await this.postsService.update(+id, updatePostDto);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.postsService.remove(+id);
+  async remove(@Param("id") id: string) {
+    return await this.postsService.remove(+id);
   }
 }

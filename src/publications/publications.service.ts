@@ -62,7 +62,11 @@ export class PublicationsService {
     );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} publication`;
+  async remove(id: number) {
+    const publication =
+      await this.publicationsRepository.getPublicationsById(id);
+    if (!publication) throw new NotFoundException();
+
+    return await this.publicationsRepository.deletePublication(id);
   }
 }

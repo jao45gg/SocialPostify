@@ -21,22 +21,25 @@ export class MediasController {
   }
 
   @Get()
-  findAll() {
-    return this.mediasService.findAll();
+  async findAll() {
+    return await this.mediasService.findAll();
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.mediasService.findOne(+id);
+  async findOne(@Param("id") id: string) {
+    return await this.mediasService.findOne(+id);
   }
 
   @Put(":id")
-  update(@Param("id") id: string, @Body() updateMediaDto: UpdateMediaDto) {
-    return this.mediasService.update(+id, updateMediaDto);
+  async update(
+    @Param("id") id: string,
+    @Body() updateMediaDto: UpdateMediaDto,
+  ) {
+    return await this.mediasService.update(+id, updateMediaDto);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.mediasService.remove(+id);
+  async remove(@Param("id") id: string) {
+    return await this.mediasService.remove(+id);
   }
 }
