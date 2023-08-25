@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -47,7 +48,13 @@ export class MediasService {
     return this.mediaReposity.updateMedia(id, updateMediaDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} media`;
+  async remove(id: number) {
+    const media = await this.mediaReposity.getMediaById(id);
+    if (!media) throw new NotFoundException();
+
+    const publication = await this.mediaReposity.getPublicationByMediaId(id);
+    if (publication) throw new ForbiddenException();
+
+    return await this.mediaReposity.deleteMedia(id);
   }
 }

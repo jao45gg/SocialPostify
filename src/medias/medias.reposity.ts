@@ -48,4 +48,20 @@ export class MediasRepository {
       },
     });
   }
+
+  async deleteMedia(id: number) {
+    return await this.prisma.media.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async getPublicationByMediaId(mediaid: number) {
+    return this.prisma.publications.findFirst({
+      where: {
+        mediaid,
+      },
+    });
+  }
 }
