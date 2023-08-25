@@ -22,8 +22,11 @@ export class PostsService {
     return media;
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async update(id: number, updatePostDto: UpdatePostDto) {
+    const post = await this.postsRepository.getPostById(id);
+    if (!post) throw new NotFoundException();
+
+    return await this.postsRepository.updatePost(id, updatePostDto);
   }
 
   remove(id: number) {

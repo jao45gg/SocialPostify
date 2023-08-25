@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreatePostDto } from "./dto/create-post.dto";
+import { UpdatePostDto } from "./dto/update-post.dto";
 
 @Injectable()
 export class PostsRepository {
@@ -22,6 +23,18 @@ export class PostsRepository {
 
   async getPostById(id: number) {
     return await this.prisma.posts.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async updatePost(id: number, updatePostDto: UpdatePostDto) {
+    return await this.prisma.posts.update({
+      data: {
+        title: updatePostDto.title,
+        text: updatePostDto.text,
+      },
       where: {
         id,
       },
