@@ -31,8 +31,12 @@ export class PublicationsService {
     return await this.publicationsRepository.getAllPublications();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} publication`;
+  async findOne(id: number) {
+    const publication =
+      await this.publicationsRepository.getPublicationsById(id);
+    if (!publication) throw new NotFoundException();
+
+    return publication;
   }
 
   update(id: number, updatePublicationDto: UpdatePublicationDto) {

@@ -19,4 +19,12 @@ export class PublicationsRepository {
   async getAllPublications() {
     return await this.prisma.publications.findMany();
   }
+
+  async getPublicationsById(id: number) {
+    return await this.prisma.publications.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
 }
