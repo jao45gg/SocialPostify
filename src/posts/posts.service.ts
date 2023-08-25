@@ -5,14 +5,14 @@ import { PostsRepository } from "./posts.repository";
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly prisma: PostsRepository) {}
+  constructor(private readonly postsRepository: PostsRepository) {}
 
   async create(createPostDto: CreatePostDto) {
-    return await this.prisma.createPost(createPostDto);
+    return await this.postsRepository.createPost(createPostDto);
   }
 
-  findAll() {
-    return `This action returns all posts`;
+  async findAll() {
+    return await this.postsRepository.getAllPosts();
   }
 
   findOne(id: number) {
