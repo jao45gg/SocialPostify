@@ -15,7 +15,7 @@ export class MediasRepository {
     });
   }
 
-  async getMedia(createMediaDto: CreateMediaDto) {
+  async getMediaByTitleAndUser(createMediaDto: CreateMediaDto) {
     return await this.prisma.media.findFirst({
       where: {
         title: createMediaDto.title,
@@ -26,5 +26,13 @@ export class MediasRepository {
 
   async getAllMedias() {
     return await this.prisma.media.findMany();
+  }
+
+  async getMediaById(id: number) {
+    return await this.prisma.media.findUnique({
+      where: {
+        id,
+      },
+    });
   }
 }

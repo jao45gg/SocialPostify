@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { CreateMediaDto } from "./dto/create-media.dto";
 import { UpdateMediaDto } from "./dto/update-media.dto";
 import { MediasRepository } from "./medias.reposity";
@@ -8,12 +14,9 @@ export class MediasService {
   constructor(private readonly mediaReposity: MediasRepository) {}
 
   async create(createMediaDto: CreateMediaDto) {
-    const media = await this.mediaReposity.getMedia(createMediaDto);
-    if (media)
-      throw new HttpException(
-        "Pair title and username already exist",
-        HttpStatus.CONFLICT,
-      );
+    const media =
+      await this.mediaReposity.getMediaByTitleAndUser(createMediaDto);
+    if (media) throw new ConflictException();
     return this.mediaReposity.addMedia(createMediaDto);
   }
 
@@ -26,8 +29,10 @@ export class MediasService {
     }));
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} media`;
+  async findOne(id: number) {
+    const media = await this.mediaReposity.getMediaById(id);
+    if (!media) throw new NotFoundException();
+    return media;
   }
 
   update(id: number, updateMediaDto: UpdateMediaDto) {
