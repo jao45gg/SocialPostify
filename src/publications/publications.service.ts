@@ -27,8 +27,8 @@ export class PublicationsService {
     );
   }
 
-  findAll() {
-    return `This action returns all publications`;
+  async findAll() {
+    return await this.publicationsRepository.getAllPublications();
   }
 
   findOne(id: number) {

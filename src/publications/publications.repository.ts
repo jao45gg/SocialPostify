@@ -15,4 +15,8 @@ export class PublicationsRepository {
       },
     });
   }
+
+  async getAllPublications() {
+    return await this.prisma.publications.findMany();
+  }
 }
