@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { CreatePublicationDto } from "./dto/create-publication.dto";
 import { UpdatePublicationDto } from "./dto/update-publication.dto";
 import { MediasRepository } from "../medias/medias.reposity";
@@ -39,8 +43,23 @@ export class PublicationsService {
     return publication;
   }
 
-  update(id: number, updatePublicationDto: UpdatePublicationDto) {
-    return `This action updates a #${id} publication`;
+  async update(id: number, updatePublicationDto: UpdatePublicationDto) {
+    const post = await this.postsRepository.getPostById(
+      updatePublicationDto.postId,
+    );
+    const media = await this.mediasRepository.getMediaById(
+      updatePublicationDto.mediaId,
+    );
+    const publication =
+      await this.publicationsRepository.getPublicationsById(id);
+    if (!post || !media || !publication) throw new NotFoundException();
+
+    if (new Date(publication.date) < new Date()) throw new ForbiddenException();
+
+    return this.publicationsRepository.updatePublication(
+      id,
+      updatePublicationDto,
+    );
   }
 
   remove(id: number) {

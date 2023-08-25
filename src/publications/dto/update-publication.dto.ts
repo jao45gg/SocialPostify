@@ -1,8 +1,6 @@
-import { PartialType } from "@nestjs/mapped-types";
-import { CreatePublicationDto } from "./create-publication.dto";
 import { IsNumber, IsNotEmpty, IsDateString } from "class-validator";
 
-export class UpdatePublicationDto extends PartialType(CreatePublicationDto) {
+export class UpdatePublicationDto {
   @IsNumber()
   @IsNotEmpty()
   mediaId: number;
