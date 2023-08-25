@@ -40,4 +40,20 @@ export class PostsRepository {
       },
     });
   }
+
+  async deletePost(id: number) {
+    return await this.prisma.posts.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async getPublicationByPostId(postid: number) {
+    return this.prisma.publications.findFirst({
+      where: {
+        postid,
+      },
+    });
+  }
 }
