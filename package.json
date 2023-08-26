@@ -17,12 +17,13 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
     "dev:load-envs": "dotenv -e .env.development",
     "test:load-envs": "dotenv -e .env.test",
     "dev:migration:run": "npm run dev:load-envs prisma migrate deploy",
     "dev:migration:generate": "npm run dev:load-envs prisma migrate dev",
-    "dev:prisma:pull": "npm run dev:load-envs npx prisma db pull"
+    "dev:prisma:pull": "npm run dev:load-envs npx prisma db pull",
+    "test:prisma": "npm run test:load-envs prisma migrate deploy",
+    "test:e2e": "npm run test:load-envs -- jest -- --runInBand --config ./test/jest-e2e.json"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -41,6 +42,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.0.2",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
