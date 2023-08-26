@@ -4,6 +4,7 @@ import * as request from "supertest";
 import { AppModule } from "./../src/app.module";
 import { createMedia } from "./factories/media.factory";
 import { PrismaService } from "../src/prisma/prisma.service";
+import { createPost } from "./factories/post.factory";
 
 describe("AppController (e2e)", () => {
   let app: INestApplication;
@@ -17,6 +18,8 @@ describe("AppController (e2e)", () => {
     app = moduleFixture.createNestApplication();
     prisma = await moduleFixture.resolve(PrismaService); //ou o get
     await prisma.media.deleteMany();
+    await prisma.posts.deleteMany();
+    await prisma.publications.deleteMany();
     await app.init();
   });
 
@@ -42,82 +45,270 @@ describe("AppController (e2e)", () => {
         }),
       );
     });
-  });
 
-  it("should GET all medias", async () => {
-    const media = createMedia();
-    await prisma.media.create({
-      data: media,
+    it("should GET all medias", async () => {
+      const media = createMedia();
+      await prisma.media.create({
+        data: media,
+      });
+      const response = await request(app.getHttpServer()).get("/medias");
+
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            title: expect.any(String),
+            username: expect.any(String),
+          }),
+        ]),
+      );
     });
-    const response = await request(app.getHttpServer()).get("/medias");
 
-    expect(response.statusCode).toBe(HttpStatus.OK);
-    expect(response.body).toEqual(
-      expect.arrayContaining([
+    it("should GET media by id", async () => {
+      const data = createMedia();
+      const media = await prisma.media.create({
+        data,
+      });
+      const response = await request(app.getHttpServer()).get(
+        `/medias/${media.id}`,
+      );
+
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
         expect.objectContaining({
           id: expect.any(Number),
           title: expect.any(String),
           username: expect.any(String),
         }),
-      ]),
-    );
+      );
+    });
+
+    it("should PUT media by id", async () => {
+      const data = createMedia();
+      const media = await prisma.media.create({
+        data,
+      });
+      const newData = createMedia();
+      const response = await request(app.getHttpServer())
+        .put(`/medias/${media.id}`)
+        .send(newData);
+
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          id: expect.any(Number),
+          title: newData.title,
+          username: newData.username,
+        }),
+      );
+    });
+
+    it("should DELETE media by id", async () => {
+      const data = createMedia();
+      const media = await prisma.media.create({
+        data,
+      });
+      const response = await request(app.getHttpServer()).delete(
+        `/medias/${media.id}`,
+      );
+
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          id: media.id,
+          title: media.title,
+          username: media.username,
+        }),
+      );
+    });
   });
 
-  it("should GET media by id", async () => {
-    const data = createMedia();
-    const media = await prisma.media.create({
-      data,
-    });
-    const response = await request(app.getHttpServer()).get(
-      `/medias/${media.id}`,
-    );
+  describe("Posts tests", () => {
+    it("should POST a post", async () => {
+      const post = createPost();
+      const response = await request(app.getHttpServer())
+        .post("/posts")
+        .send(post);
 
-    expect(response.statusCode).toBe(HttpStatus.OK);
-    expect(response.body).toEqual(
-      expect.objectContaining({
-        id: expect.any(Number),
-        title: expect.any(String),
-        username: expect.any(String),
-      }),
-    );
+      expect(response.statusCode).toBe(HttpStatus.CREATED);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          title: expect.any(String),
+          text: expect.any(String),
+        }),
+      );
+    });
+
+    it("should GET all posts", async () => {
+      const post = createPost();
+      await prisma.posts.create({
+        data: post,
+      });
+      const response = await request(app.getHttpServer()).get("/posts");
+
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            title: expect.any(String),
+            text: expect.any(String),
+          }),
+        ]),
+      );
+    });
+
+    it("should GET post by id", async () => {
+      const data = createPost();
+      const media = await prisma.posts.create({
+        data,
+      });
+      const response = await request(app.getHttpServer()).get(
+        `/posts/${media.id}`,
+      );
+
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          id: expect.any(Number),
+          title: expect.any(String),
+          text: expect.any(String),
+        }),
+      );
+    });
+
+    it("should PUT post by id", async () => {
+      const data = createPost();
+      const post = await prisma.posts.create({
+        data,
+      });
+      const newData = createPost();
+      const response = await request(app.getHttpServer())
+        .put(`/posts/${post.id}`)
+        .send(newData);
+
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          id: expect.any(Number),
+          title: newData.title,
+          text: newData.text,
+        }),
+      );
+    });
+
+    it("should DELETE post by id", async () => {
+      const data = createPost();
+      const post = await prisma.posts.create({
+        data,
+      });
+      const response = await request(app.getHttpServer()).delete(
+        `/posts/${post.id}`,
+      );
+
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          id: post.id,
+          title: post.title,
+          text: post.text,
+        }),
+      );
+    });
   });
 
-  it("should PUT media by id", async () => {
-    const data = createMedia();
-    const media = await prisma.media.create({
-      data,
+  describe("Publications tests", () => {
+    it("should POST a post", async () => {
+      const post = createPost();
+      const response = await request(app.getHttpServer())
+        .post("/publications")
+        .send(post);
+
+      expect(response.statusCode).toBe(HttpStatus.CREATED);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          title: expect.any(String),
+          text: expect.any(String),
+        }),
+      );
     });
-    const newData = createMedia();
-    const response = await request(app.getHttpServer())
-      .put(`/medias/${media.id}`)
-      .send(newData);
 
-    expect(response.statusCode).toBe(HttpStatus.OK);
-    expect(response.body).toEqual(
-      expect.objectContaining({
-        id: expect.any(Number),
-        title: newData.title,
-        username: newData.username,
-      }),
-    );
-  });
+    it("should GET all publications", async () => {
+      const post = createPost();
+      await prisma.publications.create({
+        data: post,
+      });
+      const response = await request(app.getHttpServer()).get("/publications");
 
-  it("should DELETE media by id", async () => {
-    const data = createMedia();
-    const media = await prisma.media.create({
-      data,
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            title: expect.any(String),
+            text: expect.any(String),
+          }),
+        ]),
+      );
     });
-    const response = await request(app.getHttpServer()).delete(
-      `/medias/${media.id}`,
-    );
 
-    expect(response.statusCode).toBe(HttpStatus.OK);
-    expect(response.body).toEqual(
-      expect.objectContaining({
-        id: media.id,
-        title: media.title,
-        username: media.username,
-      }),
-    );
+    it("should GET post by id", async () => {
+      const data = createPost();
+      const media = await prisma.publications.create({
+        data,
+      });
+      const response = await request(app.getHttpServer()).get(
+        `/publications/${media.id}`,
+      );
+
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          id: expect.any(Number),
+          title: expect.any(String),
+          text: expect.any(String),
+        }),
+      );
+    });
+
+    it("should PUT post by id", async () => {
+      const data = createPost();
+      const post = await prisma.publications.create({
+        data,
+      });
+      const newData = createPost();
+      const response = await request(app.getHttpServer())
+        .put(`/publications/${post.id}`)
+        .send(newData);
+
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          id: expect.any(Number),
+          title: newData.title,
+          text: newData.text,
+        }),
+      );
+    });
+
+    it("should DELETE post by id", async () => {
+      const data = createPost();
+      const post = await prisma.publications.create({
+        data,
+      });
+      const response = await request(app.getHttpServer()).delete(
+        `/publications/${post.id}`,
+      );
+
+      expect(response.statusCode).toBe(HttpStatus.OK);
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          id: post.id,
+          title: post.title,
+          text: post.text,
+        }),
+      );
+    });
   });
 });
