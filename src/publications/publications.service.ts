@@ -8,6 +8,7 @@ import { UpdatePublicationDto } from "./dto/update-publication.dto";
 import { MediasRepository } from "../medias/medias.reposity";
 import { PostsRepository } from "../posts/posts.repository";
 import { PublicationsRepository } from "./publications.repository";
+import * as dayjs from "dayjs";
 
 @Injectable()
 export class PublicationsService {
@@ -31,8 +32,23 @@ export class PublicationsService {
     );
   }
 
-  async findAll() {
-    return await this.publicationsRepository.getAllPublications();
+  async findAll(query: any) {
+    const date = new Date();
+    let publications = await this.publicationsRepository.getAllPublications();
+
+    if (query?.published !== undefined) {
+      query.published === "true"
+        ? (publications = publications.filter((p) => new Date(p.date) < date))
+        : query.published === "false" &&
+          (publications = publications.filter((p) => new Date(p.date) > date));
+    }
+
+    const after = new Date(query?.after);
+    if (dayjs(after).isValid()) {
+      publications = publications.filter((p) => new Date(p.date) > after);
+    }
+
+    return publications;
   }
 
   async findOne(id: number) {
