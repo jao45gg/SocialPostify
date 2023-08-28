@@ -1,8 +1,9 @@
 import { faker } from "@faker-js/faker";
 
-export function createPost() {
+export function createPublication(mediaId: number, postId: number) {
   return {
-    title: faker.company.name(),
-    text: faker.animal.cow(),
+    mediaId,
+    postId,
+    date: faker.date.future(),
   };
 }

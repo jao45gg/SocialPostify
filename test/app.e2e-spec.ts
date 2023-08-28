@@ -5,6 +5,7 @@ import { AppModule } from "./../src/app.module";
 import { createMedia } from "./factories/media.factory";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { createPost } from "./factories/post.factory";
+import { createPublication } from "./factories/publication.factory";
 
 describe("AppController (e2e)", () => {
   let app: INestApplication;
@@ -17,9 +18,9 @@ describe("AppController (e2e)", () => {
 
     app = moduleFixture.createNestApplication();
     prisma = await moduleFixture.resolve(PrismaService); //ou o get
+    await prisma.publications.deleteMany();
     await prisma.media.deleteMany();
     await prisma.posts.deleteMany();
-    await prisma.publications.deleteMany();
     await app.init();
   });
 
@@ -219,25 +220,52 @@ describe("AppController (e2e)", () => {
   });
 
   describe("Publications tests", () => {
-    it("should POST a post", async () => {
+    it("should POST a publication", async () => {
+      const media = createMedia();
       const post = createPost();
+
+      const mediaData = await prisma.media.create({
+        data: media,
+      });
+      const postData = await prisma.posts.create({
+        data: post,
+      });
+
+      const publication = createPublication(mediaData.id, postData.id);
+
       const response = await request(app.getHttpServer())
         .post("/publications")
-        .send(post);
+        .send(publication);
 
       expect(response.statusCode).toBe(HttpStatus.CREATED);
       expect(response.body).toEqual(
         expect.objectContaining({
-          title: expect.any(String),
-          text: expect.any(String),
+          id: expect.any(Number),
+          mediaid: publication.mediaId,
+          postid: publication.postId,
+          date: expect.any(String),
         }),
       );
     });
 
     it("should GET all publications", async () => {
+      const media = createMedia();
       const post = createPost();
-      await prisma.publications.create({
+
+      const mediaData = await prisma.media.create({
+        data: media,
+      });
+      const postData = await prisma.posts.create({
         data: post,
+      });
+
+      const publication = createPublication(mediaData.id, postData.id);
+      await prisma.publications.create({
+        data: {
+          mediaid: publication.mediaId,
+          postid: publication.postId,
+          date: publication.date,
+        },
       });
       const response = await request(app.getHttpServer()).get("/publications");
 
@@ -246,67 +274,113 @@ describe("AppController (e2e)", () => {
         expect.arrayContaining([
           expect.objectContaining({
             id: expect.any(Number),
-            title: expect.any(String),
-            text: expect.any(String),
+            mediaid: publication.mediaId,
+            postid: publication.postId,
+            date: expect.any(String),
           }),
         ]),
       );
     });
 
-    it("should GET post by id", async () => {
-      const data = createPost();
-      const media = await prisma.publications.create({
-        data,
+    it("should GET publication by id", async () => {
+      const media = createMedia();
+      const post = createPost();
+
+      const mediaData = await prisma.media.create({
+        data: media,
+      });
+      const postData = await prisma.posts.create({
+        data: post,
+      });
+
+      const publication = createPublication(mediaData.id, postData.id);
+      const data = await prisma.publications.create({
+        data: {
+          mediaid: publication.mediaId,
+          postid: publication.postId,
+          date: publication.date,
+        },
       });
       const response = await request(app.getHttpServer()).get(
-        `/publications/${media.id}`,
+        `/publications/${data.id}`,
       );
 
       expect(response.statusCode).toBe(HttpStatus.OK);
       expect(response.body).toEqual(
         expect.objectContaining({
           id: expect.any(Number),
-          title: expect.any(String),
-          text: expect.any(String),
+          mediaid: expect.any(Number),
+          postid: expect.any(Number),
+          date: expect.any(String),
         }),
       );
     });
 
-    it("should PUT post by id", async () => {
-      const data = createPost();
-      const post = await prisma.publications.create({
-        data,
+    it("should PUT publication by id", async () => {
+      const media = createMedia();
+      const post = createPost();
+
+      const mediaData = await prisma.media.create({
+        data: media,
       });
-      const newData = createPost();
+      const postData = await prisma.posts.create({
+        data: post,
+      });
+
+      const publication = createPublication(mediaData.id, postData.id);
+      const data = await prisma.publications.create({
+        data: {
+          mediaid: publication.mediaId,
+          postid: publication.postId,
+          date: publication.date,
+        },
+      });
+      const newData = createPublication(mediaData.id, postData.id);
       const response = await request(app.getHttpServer())
-        .put(`/publications/${post.id}`)
+        .put(`/publications/${data.id}`)
         .send(newData);
 
       expect(response.statusCode).toBe(HttpStatus.OK);
       expect(response.body).toEqual(
         expect.objectContaining({
           id: expect.any(Number),
-          title: newData.title,
-          text: newData.text,
+          mediaid: mediaData.id,
+          postid: postData.id,
+          date: expect.any(String),
         }),
       );
     });
 
-    it("should DELETE post by id", async () => {
-      const data = createPost();
-      const post = await prisma.publications.create({
-        data,
+    it("should DELETE publication by id", async () => {
+      const media = createMedia();
+      const post = createPost();
+
+      const mediaData = await prisma.media.create({
+        data: media,
+      });
+      const postData = await prisma.posts.create({
+        data: post,
+      });
+
+      const publication = createPublication(mediaData.id, postData.id);
+      const data = await prisma.publications.create({
+        data: {
+          mediaid: publication.mediaId,
+          postid: publication.postId,
+          date: publication.date,
+        },
       });
       const response = await request(app.getHttpServer()).delete(
-        `/publications/${post.id}`,
+        `/publications/${data.id}`,
       );
 
       expect(response.statusCode).toBe(HttpStatus.OK);
       expect(response.body).toEqual(
         expect.objectContaining({
-          id: post.id,
-          title: post.title,
-          text: post.text,
+          id: expect.any(Number),
+          mediaid: data.mediaid,
+          postid: publication.postId,
+          date: expect.any(String),
         }),
       );
     });
